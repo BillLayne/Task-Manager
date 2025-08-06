@@ -32,11 +32,14 @@
         
         .card-hover {
             transition: all 0.2s ease;
+            position: relative;
+            z-index: 1;
         }
         
         .card-hover:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 10;
         }
         
         .dark .card-hover:hover {
@@ -283,6 +286,29 @@
             @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
         }
         
+        /* Fix overlapping issues */
+        #allTasksList {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Ensure dropdowns and expandable content work properly */
+        details[open] {
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Fix for the main grid layout */
+        .lg\:col-span-4 {
+            position: relative;
+            z-index: 2;
+        }
+
+        .space-y-6:last-child {
+            position: relative;
+            z-index: 1;
+        }
+        
         .comm-call {
             @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300;
         }
@@ -421,7 +447,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
             
             <!-- Left Column - Tasks (4/5 width) -->
-            <div class="lg:col-span-4 space-y-6">
+            <div class="lg:col-span-4 space-y-6" style="position: relative; z-index: 2;">
                 <!-- Task Filters and Quick Views -->
                 <div class="glass rounded-xl p-6 shadow-sm">
                     <div class="flex flex-col md:flex-row gap-3">
@@ -494,7 +520,7 @@
                 </div>
 
                 <!-- All Tasks (Sorted by Due Date) -->
-                <div class="glass rounded-xl p-6 shadow-sm">
+                <div class="glass rounded-xl p-6 shadow-sm" style="position: relative;">
                     <h2 class="text-lg font-bold mb-3 flex items-center justify-between">
                         <span>
                             <i class="fas fa-list-check mr-2 text-blue-600"></i>
@@ -518,7 +544,7 @@
             </div>
 
             <!-- Right Column - Quick Actions (1/5 width) -->
-            <div class="space-y-6">
+            <div class="space-y-6" style="position: relative; z-index: 1;">
                 <!-- Quick Actions -->
                 <div class="glass rounded-xl p-6 shadow-sm">
                     <h2 class="text-lg font-bold mb-4">Quick Actions</h2>
