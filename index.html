@@ -265,13 +265,9 @@
             100% { background-position: 0% 50%; }
         }
         
-        /* Modern gradient header */
+        /* Modern gradient header - removed to fix text visibility */
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .dark header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            @apply bg-white dark:bg-slate-900;
         }
         
         /* Enhanced toast with slide and fade */
@@ -1346,6 +1342,9 @@ Include:
                             </div>
                             <!-- Action Buttons -->
                             <div class="flex gap-1.5">
+                                <button onclick="app.addToGoogleTasks('${task.id}')" class="w-9 h-9 rounded-lg ${task.exportedToGoogle ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600'} hover:bg-blue-200 flex items-center justify-center" title="${task.exportedToGoogle ? 'Already in Google Calendar' : 'Add to Google Calendar'}">
+                                    <i class="fab fa-google${task.exportedToGoogle ? ' fa-check' : ''}"></i>
+                                </button>
                                 <button onclick="app.openCommunicationLog('${task.id}')" class="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 hover:bg-purple-200 flex items-center justify-center" title="Communications">
                                     <i class="fas fa-comments"></i>
                                 </button>
@@ -1544,6 +1543,44 @@ Include:
                     }
                     this.showToast('Switched to compact view', 'info');
                 }
+            }
+            
+            // Google Tasks Integration
+            addToGoogleTasks(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                // Format task details for Google Tasks
+                const taskTitle = `${task.customerName} - ${task.taskType.replace('-', ' ').toUpperCase()}`;
+                const taskNotes = `${task.description}\n\nInsurance: ${task.insuranceCompany || 'N/A'}\nPolicy: ${task.policyNumber || 'N/A'}\nPremium: ${task.premiumAmount || 'N/A'}\nPhone: ${task.phone || 'N/A'}\nEmail: ${task.email || 'N/A'}`;
+                
+                // Format due date for Google Tasks (RFC 3339 format)
+                const dueDate = task.dueDate ? new Date(task.dueDate).toISOString() : '';
+                
+                // Create Google Tasks URL with pre-filled data
+                // Note: Google Tasks doesn't have a direct URL scheme for adding tasks,
+                // so we'll create a Google Calendar event instead which integrates with Tasks
+                const calendarUrl = new URL('https://calendar.google.com/calendar/render');
+                calendarUrl.searchParams.set('action', 'TEMPLATE');
+                calendarUrl.searchParams.set('text', taskTitle);
+                calendarUrl.searchParams.set('details', taskNotes);
+                
+                if (task.dueDate) {
+                    // Format date as YYYYMMDD
+                    const date = new Date(task.dueDate);
+                    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+                    calendarUrl.searchParams.set('dates', `${dateStr}/${dateStr}`);
+                }
+                
+                // Open in new tab
+                window.open(calendarUrl.toString(), '_blank');
+                
+                // Show success message
+                this.showToast('Opening Google Calendar to create task/event', 'success');
+                
+                // Optional: Mark that this task has been exported
+                task.exportedToGoogle = true;
+                this.saveData();
             }
 
             // Communication Management
