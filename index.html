@@ -46,12 +46,12 @@
         /* Due date urgency styles */
         .due-overdue {
             border-left: 4px solid #ef4444;
-            background: linear-gradient(135deg, rgba(254, 226, 226, 0.5) 0%, rgba(254, 202, 202, 0.3) 100%);
+            background: rgba(254, 226, 226, 0.4) !important; /* Reddish background */
             animation: pulse 2s infinite;
         }
         
         .dark .due-overdue {
-            background: linear-gradient(135deg, rgba(127, 29, 29, 0.4) 0%, rgba(127, 29, 29, 0.2) 100%);
+            background: rgba(127, 29, 29, 0.3) !important; /* Dark mode reddish */
         }
         
         .due-today {
@@ -227,6 +227,54 @@
         @media (min-width: 1536px) {
             .task-container {
                 grid-template-columns: repeat(2, 1fr); /* Reduced from 4 */
+            }
+        }
+
+        /* Compact view mode */
+        .task-container-compact {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .task-container-compact {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .task-container-compact {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .task-container-compact {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Comfortable view mode (current default) */
+        .task-container-comfortable {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .task-container-comfortable {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .task-container-comfortable {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .task-container-comfortable {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         
@@ -838,6 +886,18 @@ Include:
                 this.loadData();
                 this.initializeEventListeners();
                 this.initializeTheme();
+                
+                // Load view mode preference
+                const savedViewMode = localStorage.getItem('viewMode') || 'comfortable';
+                const container = document.getElementById('allTasksList');
+                if (container) {
+                    if (savedViewMode === 'compact') {
+                        container.classList.add('task-container-compact');
+                    } else {
+                        container.classList.add('task-container-comfortable');
+                    }
+                }
+                
                 this.renderTasks();
                 this.updateStats();
                 this.updateProgress();
@@ -1294,15 +1354,30 @@ Include:
             // View Toggle Feature
             toggleViewMode() {
                 const container = document.getElementById('allTasksList');
-                if (container.classList.contains('task-container-compact')) {
+                const btn = document.querySelector('[onclick="app.toggleViewMode()"]');
+                
+                if (!container) return;
+                
+                // Check current view mode
+                const isCompact = container.classList.contains('task-container-compact');
+                
+                if (isCompact) {
+                    // Switch to comfortable
                     container.classList.remove('task-container-compact');
                     container.classList.add('task-container-comfortable');
                     localStorage.setItem('viewMode', 'comfortable');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-th mr-2"></i>Compact';
+                    }
                     this.showToast('Switched to comfortable view', 'info');
                 } else {
+                    // Switch to compact
+                    container.classList.remove('task-container-comfortable', 'task-container');
                     container.classList.add('task-container-compact');
-                    container.classList.remove('task-container-comfortable');
                     localStorage.setItem('viewMode', 'compact');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-th-large mr-2"></i>Comfortable';
+                    }
                     this.showToast('Switched to compact view', 'info');
                 }
             }
@@ -2351,13 +2426,28 @@ Include:
                 
                 const diffDays = Math.floor((date - today) / (1000 * 60 * 60 * 24));
                 
-                if (diffDays === 0) return 'Today';
-                if (diffDays === 1) return 'Tomorrow';
-                if (diffDays === -1) return 'Yesterday';
-                if (diffDays < -1) return `${Math.abs(diffDays)} days overdue`;
-                if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
+                // Format the actual date
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
                 
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                // Add status indicator in parentheses for context
+                let statusText = '';
+                if (diffDays === 0) {
+                    statusText = ' (Today)';
+                } else if (diffDays === 1) {
+                    statusText = ' (Tomorrow)';
+                } else if (diffDays === -1) {
+                    statusText = ' (Yesterday)';
+                } else if (diffDays < -1) {
+                    statusText = ` (${Math.abs(diffDays)} days overdue)`;
+                } else if (diffDays > 1 && diffDays <= 7) {
+                    statusText = ` (In ${diffDays} days)`;
+                }
+                
+                return formattedDate + statusText;
             }
 
             showToast(message, type = 'success') {
