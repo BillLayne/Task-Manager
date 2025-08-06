@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Layne Insurance - Task Manager Pro</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .dark .glass {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark .card-hover:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Due date urgency styles */
+        .due-overdue {
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(135deg, rgba(254, 226, 226, 0.5) 0%, rgba(254, 202, 202, 0.3) 100%);
+            animation: pulse 2s infinite;
+        }
+        
+        .dark .due-overdue {
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.4) 0%, rgba(127, 29, 29, 0.2) 100%);
+        }
+        
+        .due-today {
+            border-left: 4px solid #f97316;
+            background: linear-gradient(135deg, rgba(254, 243, 199, 0.5) 0%, rgba(254, 215, 170, 0.3) 100%);
+        }
+        
+        .dark .due-today {
+            background: linear-gradient(135deg, rgba(154, 52, 18, 0.4) 0%, rgba(154, 52, 18, 0.2) 100%);
+        }
+        
+        .due-tomorrow {
+            border-left: 4px solid #eab308;
+            background: linear-gradient(135deg, rgba(254, 249, 195, 0.4) 0%, rgba(254, 240, 138, 0.2) 100%);
+        }
+        
+        .dark .due-tomorrow {
+            background: linear-gradient(135deg, rgba(161, 98, 7, 0.3) 0%, rgba(161, 98, 7, 0.15) 100%);
+        }
+        
+        .due-thisweek {
+            border-left: 4px solid #3b82f6;
+            background: linear-gradient(135deg, rgba(219, 234, 254, 0.3) 0%, rgba(191, 219, 254, 0.15) 100%);
+        }
+        
+        .dark .due-thisweek {
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.2) 0%, rgba(29, 78, 216, 0.1) 100%);
+        }
+        
+        .due-later {
+            border-left: 4px solid #10b981;
+        }
+        
+        .priority-urgent {
+            position: relative;
+        }
+        
+        .priority-urgent::before {
+            content: '⚡';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .task-type-change {
+            border-left: 4px solid #f59e0b;
+            background: transparent;
+        }
+        
+        .task-type-requote {
+            border-left: 4px solid #3b82f6;
+            background: transparent;
+        }
+        
+        .task-type-renewal {
+            border-left: 4px solid #10b981;
+            background: transparent;
+        }
+        
+        .task-type-new {
+            border-left: 4px solid #a855f7;
+            background: transparent;
+        }
+        
+        .task-type-claim {
+            border-left: 4px solid #ef4444;
+            background: transparent;
+        }
+        
+        .task-type-todo {
+            border-left: 4px solid #6b7280;
+            background: transparent;
+        }
+        
+        /* Dark mode adjustments */
+        .dark .task-type-change,
+        .dark .task-type-requote,
+        .dark .task-type-renewal,
+        .dark .task-type-new,
+        .dark .task-type-claim,
+        .dark .task-type-todo {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        .btn {
+            @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+        }
+        
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl;
+        }
+        
+        .btn-secondary {
+            @apply bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600;
+        }
+        
+        .btn-success {
+            @apply bg-green-600 text-white hover:bg-green-700;
+        }
+        
+        .btn-danger {
+            @apply bg-red-600 text-white hover:bg-red-700;
+        }
+        
+        .btn-warning {
+            @apply bg-yellow-500 text-white hover:bg-yellow-600;
+        }
+        
+        .btn-sm {
+            @apply px-3 py-1.5 text-sm;
+        }
+        
+        .form-input {
+            @apply w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+        }
+        
+        .form-select {
+            @apply w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+        }
+        
+        .action-btn {
+            @apply w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 text-sm;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .btn {
+                @apply px-3 py-2 text-sm;
+            }
+            
+            .form-input, .form-select {
+                @apply px-3 py-2 text-sm;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .task-completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+        
+        /* Task container styles - Reduce columns for better readability */
+        .task-container {
+            display: grid;
+            gap: 1.25rem; /* Increased from 0.75rem */
+        }
+        
+        @media (min-width: 768px) {
+            .task-container {
+                grid-template-columns: repeat(1, 1fr); /* Reduced from 2 */
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .task-container {
+                grid-template-columns: repeat(2, 1fr); /* Reduced from 3 */
+            }
+        }
+        
+        @media (min-width: 1536px) {
+            .task-container {
+                grid-template-columns: repeat(2, 1fr); /* Reduced from 4 */
+            }
+        }
+        
+        /* Communication log styles */
+        .comm-badge {
+            @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+        }
+        
+        .comm-call {
+            @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300;
+        }
+        
+        .comm-email {
+            @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+        }
+        
+        .comm-meeting {
+            @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300;
+        }
+        
+        .comm-note {
+            @apply bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300;
+        }
+        
+        .comm-text {
+            @apply bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300;
+        }
+        
+        /* Due date badges */
+        .due-badge {
+            @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-bold;
+        }
+        
+        .due-badge-overdue {
+            @apply bg-red-600 text-white animate-pulse;
+        }
+        
+        .due-badge-today {
+            @apply bg-orange-600 text-white;
+        }
+        
+        .due-badge-tomorrow {
+            @apply bg-yellow-500 text-white;
+        }
+        
+        .due-badge-thisweek {
+            @apply bg-blue-500 text-white;
+        }
+        
+        .due-badge-later {
+            @apply bg-green-500 text-white;
+        }
+        
+        /* Insurance company badges */
+        .carrier-badge {
+            @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300;
+        }
+        
+        /* OneDrive badge */
+        .onedrive-badge {
+            @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300;
+        }
+        
+        /* Follow-up indicator */
+        .follow-up-needed {
+            @apply relative;
+        }
+        
+        .follow-up-needed::after {
+            content: '!';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #f59e0b;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Bill Layne Insurance</h1>
+                        <p class="text-xs text-slate-500">Task Manager Pro</p>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-red-600" id="overdueCount">0</div>
+                        <div class="text-xs text-slate-500">Overdue</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-orange-600" id="todayCount">0</div>
+                        <div class="text-xs text-slate-500">Due Today</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-yellow-600" id="tomorrowCount">0</div>
+                        <div class="text-xs text-slate-500">Tomorrow</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-blue-600" id="weekCount">0</div>
+                        <div class="text-xs text-slate-500">This Week</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-green-600" id="totalTasksCount">0</div>
+                        <div class="text-xs text-slate-500">Total Active</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="openQuickTaskModal()" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus mr-2"></i>Add Task
+                    </button>
+                    <button id="themeToggle" class="action-btn bg-slate-100 dark:bg-slate-800">
+                        <i class="fas fa-sun dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            
+            <!-- Left Column - Tasks (4/5 width) -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Task Filters and Quick Views -->
+                <div class="glass rounded-xl p-6 shadow-sm">
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="taskSearch" placeholder="Search tasks, customers, carriers, OneDrive links, or policy numbers..." class="form-input flex-1">
+                        
+                        <!-- Quick Date Filters -->
+                        <div class="flex gap-2">
+                            <button onclick="filterByDate('overdue')" class="btn btn-sm btn-danger">
+                                Overdue
+                            </button>
+                            <button onclick="filterByDate('today')" class="btn btn-sm btn-warning">
+                                Today
+                            </button>
+                            <button onclick="filterByDate('tomorrow')" class="btn btn-sm btn-secondary">
+                                Tomorrow
+                            </button>
+                            <button onclick="filterByDate('week')" class="btn btn-sm btn-secondary">
+                                This Week
+                            </button>
+                            <button onclick="filterByDate('all')" class="btn btn-sm btn-secondary">
+                                All
+                            </button>
+                        </div>
+                        
+                        <select id="taskTypeFilter" class="form-select md:w-40">
+                            <option value="">All Types</option>
+                            <option value="change">Policy Change</option>
+                            <option value="requote">Requote</option>
+                            <option value="renewal">Renewal</option>
+                            <option value="new">New Business</option>
+                            <option value="claim">Claim</option>
+                            <option value="follow-up">Follow Up</option>
+                            <option value="todo">To Do</option>
+                            <option value="other">Other</option>
+                        </select>
+                        
+                        <button onclick="toggleCompletedTasks()" class="btn btn-secondary btn-sm whitespace-nowrap">
+                            <i class="fas fa-eye mr-2"></i>Completed
+                        </button>
+                        
+                        <button onclick="app.toggleViewMode()" class="btn btn-secondary btn-sm whitespace-nowrap">
+                            <i class="fas fa-th-large mr-2"></i>View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tasks Progress Bar -->
+                <div class="glass rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-slate-600 dark:text-slate-400">Today's Progress</h3>
+                        <span class="text-sm text-slate-500" id="progressText">0 of 0 completed</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                        <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Follow-up Alert Box -->
+                <div id="followUpAlert" class="hidden glass rounded-xl p-4 shadow-sm bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-amber-600 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold text-amber-800 dark:text-amber-300">Follow-ups Needed</h3>
+                            <p class="text-sm text-amber-700 dark:text-amber-400" id="followUpText">You have X tasks that haven't been updated in over 7 days</p>
+                        </div>
+                        <button onclick="showStaleTask()" class="ml-auto btn btn-sm btn-warning">
+                            View Tasks
+                        </button>
+                    </div>
+                </div>
+
+                <!-- All Tasks (Sorted by Due Date) -->
+                <div class="glass rounded-xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold mb-3 flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-list-check mr-2 text-blue-600"></i>
+                            Tasks (Sorted by Due Date)
+                            <span class="ml-2 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full" id="allTaskCount">0</span>
+                        </span>
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs text-slate-500"><i class="fas fa-hand-pointer mr-1"></i>Double-click to expand</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500">Recurring:</span>
+                                <button onclick="showRecurringTasks()" class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-full hover:bg-purple-200">
+                                    <i class="fas fa-sync mr-1"></i><span id="recurringCount">0</span>
+                                </button>
+                            </div>
+                        </div>
+                    </h2>
+                    <div id="allTasksList" class="task-container">
+                        <!-- All tasks will be rendered here sorted by due date -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Quick Actions (1/5 width) -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <div class="glass rounded-xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold mb-4">Quick Actions</h2>
+                    <div class="space-y-2">
+                        <button onclick="openTaskModal('change')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-exchange-alt mr-2 text-orange-500"></i>Policy Change
+                        </button>
+                        <button onclick="openTaskModal('requote')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-redo mr-2 text-blue-500"></i>Requote
+                        </button>
+                        <button onclick="openTaskModal('renewal')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-calendar-check mr-2 text-green-500"></i>Renewal
+                        </button>
+                        <button onclick="openTaskModal('new')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-user-plus mr-2 text-purple-500"></i>New Business
+                        </button>
+                        <button onclick="openTaskModal('claim')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-file-alt mr-2 text-red-500"></i>Claim
+                        </button>
+                        <button onclick="openTaskModal('follow-up')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-phone mr-2 text-cyan-500"></i>Follow Up
+                        </button>
+                        <button onclick="openTaskModal('todo')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-check-square mr-2 text-indigo-500"></i>To Do
+                        </button>
+                        <button onclick="openTaskModal('other')" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-ellipsis-h mr-2 text-gray-500"></i>Other
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task Templates -->
+                <div class="glass rounded-xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold mb-4">Templates</h2>
+                    <div class="space-y-2">
+                        <button onclick="useTemplate('renewal-60')" class="btn btn-secondary btn-sm w-full justify-start text-xs">
+                            <i class="fas fa-copy mr-2"></i>60-Day Renewal
+                        </button>
+                        <button onclick="useTemplate('renewal-30')" class="btn btn-secondary btn-sm w-full justify-start text-xs">
+                            <i class="fas fa-copy mr-2"></i>30-Day Renewal
+                        </button>
+                        <button onclick="useTemplate('new-client')" class="btn btn-secondary btn-sm w-full justify-start text-xs">
+                            <i class="fas fa-copy mr-2"></i>New Client Setup
+                        </button>
+                        <button onclick="useTemplate('claim-followup')" class="btn btn-secondary btn-sm w-full justify-start text-xs">
+                            <i class="fas fa-copy mr-2"></i>Claim Follow-up
+                        </button>
+                        <button onclick="useTemplate('quote-followup')" class="btn btn-secondary btn-sm w-full justify-start text-xs">
+                            <i class="fas fa-copy mr-2"></i>Quote Follow-up
+                        </button>
+                        <button onclick="useTemplate('payment-reminder')" class="btn btn-secondary btn-sm w-full justify-start text-xs">
+                            <i class="fas fa-copy mr-2"></i>Payment Reminder
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="glass rounded-xl p-6 shadow-sm">
+                    <h2 class="text-lg font-bold mb-4">Data</h2>
+                    <div class="space-y-2">
+                        <button onclick="exportData()" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-download mr-2"></i>Export
+                        </button>
+                        <button onclick="importData()" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-upload mr-2"></i>Import
+                        </button>
+                        <button onclick="clearCompleted()" class="btn btn-secondary btn-sm w-full justify-start text-orange-600">
+                            <i class="fas fa-broom mr-2"></i>Clear Done
+                        </button>
+                        <button onclick="generateReport()" class="btn btn-secondary btn-sm w-full justify-start">
+                            <i class="fas fa-chart-bar mr-2"></i>Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 z-10">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold" id="taskModalTitle">Add Task</h2>
+                        <button onclick="closeTaskModal()" class="action-btn hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="taskForm" class="p-4 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Task Type *</label>
+                            <select name="taskType" id="taskTypeSelect" required class="form-select">
+                                <option value="">Select Type</option>
+                                <option value="change">Policy Change</option>
+                                <option value="requote">Requote</option>
+                                <option value="renewal">Renewal</option>
+                                <option value="new">New Business</option>
+                                <option value="claim">Claim</option>
+                                <option value="follow-up">Follow Up</option>
+                                <option value="todo">To Do</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option value="normal">🔵 Normal</option>
+                                <option value="urgent">🔴 Urgent</option>
+                                <option value="high">🟠 High</option>
+                                <option value="low">🟢 Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Customer Name *</label>
+                        <input type="text" name="customerName" required class="form-input" placeholder="Enter customer name">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Insurance Company</label>
+                        <select name="insuranceCompanySelect" id="insuranceCompanySelect" onchange="toggleOtherCarrier(this)" class="form-select">
+                            <option value="">Select Carrier</option>
+                            <option value="State Farm">State Farm</option>
+                            <option value="Allstate">Allstate</option>
+                            <option value="Progressive">Progressive</option>
+                            <option value="GEICO">GEICO</option>
+                            <option value="Liberty Mutual">Liberty Mutual</option>
+                            <option value="Farmers">Farmers</option>
+                            <option value="Nationwide">Nationwide</option>
+                            <option value="Travelers">Travelers</option>
+                            <option value="American Family">American Family</option>
+                            <option value="USAA">USAA</option>
+                            <option value="MetLife">MetLife</option>
+                            <option value="Hartford">Hartford</option>
+                            <option value="Chubb">Chubb</option>
+                            <option value="Erie Insurance">Erie Insurance</option>
+                            <option value="Auto-Owners">Auto-Owners</option>
+                            <option value="National General">National General</option>
+                            <option value="NC Grange Mutual">NC Grange Mutual</option>
+                            <option value="Alamance Farmers">Alamance Farmers</option>
+                            <option value="Foremost">Foremost</option>
+                            <option value="Other">Other (Enter Below)</option>
+                        </select>
+                        <input type="text" name="insuranceCompany" id="otherCarrierInput" class="form-input mt-2 hidden" placeholder="Enter insurance company name">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Description *</label>
+                        <textarea name="description" required rows="8" class="form-input resize-y min-h-[180px] w-full" placeholder="What needs to be done? Be specific...
+Include details about:
+- Coverage types to review
+- Policy changes needed  
+- Special customer requests
+- Important deadlines
+- Contact information
+- Any special circumstances"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Due Date *</label>
+                            <input type="date" name="dueDate" required class="form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Follow-up Date</label>
+                            <input type="date" name="followUpDate" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Phone</label>
+                            <input type="tel" name="phone" class="form-input" placeholder="(555) 123-4567">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Email</label>
+                            <input type="email" name="email" class="form-input" placeholder="email@example.com">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Policy/Reference #</label>
+                            <input type="text" name="policyNumber" class="form-input" placeholder="Policy or reference number">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Premium Amount</label>
+                            <input type="text" name="premiumAmount" class="form-input" placeholder="$0.00">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">OneDrive Folder Link</label>
+                        <input type="url" name="oneDriveLink" class="form-input" placeholder="https://onedrive.live.com/... (paste client folder link here)">
+                        <p class="text-xs text-slate-500 mt-1">Add the OneDrive folder link for this client's documents</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">
+                            <input type="checkbox" name="isRecurring" onchange="toggleRecurring(this)">
+                            Recurring Task
+                        </label>
+                        <select name="recurringFrequency" id="recurringFrequency" class="form-select mt-2 hidden">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="biweekly">Bi-weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="semiannually">Semi-annually</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Notes</label>
+                        <textarea name="notes" rows="5" class="form-input resize-y min-h-[120px] w-full" placeholder="Additional notes, special instructions, or important details...
+Include:
+- Special circumstances or exceptions
+- Previous conversations or agreements
+- Important reminders
+- Internal notes for team members"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <button type="button" onclick="closeTaskModal()" class="btn btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-2"></i>Save Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Date Modal -->
+    <div id="templateDateModal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full shadow-2xl">
+                <div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold">Select Renewal Date</h2>
+                        <button onclick="closeTemplateDateModal()" class="action-btn hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Choose the renewal date for this policy:</p>
+                    <input type="date" id="templateDateInput" class="form-input w-full mb-4">
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="closeTemplateDateModal()" class="btn btn-secondary">
+                            Cancel
+                        </button>
+                        <button onclick="applyTemplateWithDate()" class="btn btn-primary">
+                            <i class="fas fa-check mr-2"></i>Apply Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal (View Mode) -->
+    <div id="taskDetailModal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl max-w-4xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 z-10">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold">Task Details</h2>
+                        <button onclick="closeTaskDetailModal()" class="action-btn hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="taskDetailContent" class="p-6">
+                    <!-- Task details will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Communication Modal -->
+    <div id="communicationModal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden">
+                <div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold">Communication Log</h2>
+                        <button onclick="closeCommunicationModal()" class="action-btn hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col h-[60vh]">
+                    <!-- Communication History -->
+                    <div class="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-900">
+                        <div id="communicationHistory" class="space-y-3">
+                            <!-- Communications will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Add Communication Form -->
+                    <div class="border-t border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800">
+                        <form id="communicationForm" class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <select name="commType" required class="form-select">
+                                    <option value="">Select Type</option>
+                                    <option value="call">📞 Phone Call</option>
+                                    <option value="email">📧 Email</option>
+                                    <option value="meeting">🤝 Meeting</option>
+                                    <option value="text">💬 Text Message</option>
+                                    <option value="note">📝 Note</option>
+                                </select>
+                                <input type="date" name="commDate" required class="form-input">
+                                <input type="time" name="commTime" class="form-input">
+                            </div>
+                            <div class="flex gap-3">
+                                <input type="text" name="commNotes" required placeholder="Add communication details..." class="form-input flex-1">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus mr-2"></i>Add
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-white dark:bg-slate-800 rounded-lg p-4 shadow-lg transform translate-y-full transition-transform duration-300 z-50">
+        <div class="flex items-center space-x-3">
+            <i id="toastIcon" class="fas fa-check-circle text-green-500 text-xl"></i>
+            <span id="toastMessage" class="font-medium">Action completed!</span>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Task Manager for Insurance Agency
+        class InsuranceTaskManager {
+            constructor() {
+                this.tasks = [];
+                this.communications = [];
+                this.taskHistory = [];  // New: Track all task changes
+                this.showCompleted = false;
+                this.currentEditTaskId = null;
+                this.currentTaskIdForComm = null;
+                this.currentDateFilter = 'all';
+                this.pendingTemplate = null;  // Store template type for date selection
+                
+                this.initializeApp();
+            }
+
+            initializeApp() {
+                this.loadData();
+                this.initializeEventListeners();
+                this.initializeTheme();
+                this.renderTasks();
+                this.updateStats();
+                this.updateProgress();
+                this.checkRecurringTasks();
+                this.checkStaleTasks();
+                
+                // Auto-save every minute
+                setInterval(() => this.saveData(), 60000);
+                
+                // Check for due tasks every minute
+                setInterval(() => this.checkDueTasks(), 60000);
+                
+                // Check for stale tasks every hour
+                setInterval(() => this.checkStaleTasks(), 3600000);
+            }
+
+            // Data Management
+            loadData() {
+                this.tasks = JSON.parse(localStorage.getItem('insuranceTasks')) || [];
+                this.communications = JSON.parse(localStorage.getItem('insuranceCommunications')) || [];
+                this.taskHistory = JSON.parse(localStorage.getItem('insuranceTaskHistory')) || [];
+                
+                // Clean up any invalid data
+                this.tasks = this.tasks.filter(t => t && t.id && t.description);
+                this.communications = this.communications.filter(c => c && c.id && c.taskId);
+                this.taskHistory = this.taskHistory.filter(h => h && h.id && h.taskId);
+            }
+
+            saveData() {
+                localStorage.setItem('insuranceTasks', JSON.stringify(this.tasks));
+                localStorage.setItem('insuranceCommunications', JSON.stringify(this.communications));
+                localStorage.setItem('insuranceTaskHistory', JSON.stringify(this.taskHistory));
+            }
+
+            // Add history entry for task changes
+            addHistory(taskId, action, details = {}) {
+                const historyEntry = {
+                    id: this.generateId(),
+                    taskId: taskId,
+                    action: action,
+                    details: details,
+                    timestamp: new Date().toISOString(),
+                    user: 'User' // Could be expanded for multi-user
+                };
+                
+                this.taskHistory.push(historyEntry);
+                this.saveData();
+            }
+
+            // Event Listeners
+            initializeEventListeners() {
+                // Theme
+                document.getElementById('themeToggle')?.addEventListener('click', () => this.toggleTheme());
+                
+                // Forms
+                document.getElementById('taskForm')?.addEventListener('submit', (e) => this.handleTaskSubmit(e));
+                document.getElementById('communicationForm')?.addEventListener('submit', (e) => this.handleCommunicationSubmit(e));
+                
+                // Search & Filters
+                document.getElementById('taskSearch')?.addEventListener('input', () => this.renderTasks());
+                document.getElementById('taskTypeFilter')?.addEventListener('change', () => this.renderTasks());
+                
+                // Set default date/time for communication form
+                document.getElementById('communicationModal')?.addEventListener('click', () => {
+                    const dateInput = document.querySelector('[name="commDate"]');
+                    const timeInput = document.querySelector('[name="commTime"]');
+                    if (dateInput && !dateInput.value) {
+                        dateInput.value = new Date().toISOString().split('T')[0];
+                    }
+                    if (timeInput && !timeInput.value) {
+                        const now = new Date();
+                        timeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                    }
+                });
+            }
+
+            // Theme
+            initializeTheme() {
+                const theme = localStorage.getItem('theme') || 'light';
+                document.documentElement.className = theme;
+            }
+
+            toggleTheme() {
+                const html = document.documentElement;
+                const newTheme = html.className === 'light' ? 'dark' : 'light';
+                html.className = newTheme;
+                localStorage.setItem('theme', newTheme);
+            }
+
+            // Check for stale tasks
+            checkStaleTasks() {
+                const staleTasks = this.tasks.filter(task => {
+                    if (task.status === 'completed') return false;
+                    
+                    // Check last communication
+                    const taskComms = this.communications.filter(c => c.taskId === task.id);
+                    const lastCommDate = taskComms.length > 0 ? 
+                        Math.max(...taskComms.map(c => new Date(c.timestamp))) : 
+                        new Date(task.createdAt);
+                    
+                    const daysSinceContact = Math.floor((new Date() - lastCommDate) / (1000 * 60 * 60 * 24));
+                    return daysSinceContact > 7;
+                });
+                
+                if (staleTasks.length > 0) {
+                    const alertBox = document.getElementById('followUpAlert');
+                    const alertText = document.getElementById('followUpText');
+                    if (alertBox && alertText) {
+                        alertBox.classList.remove('hidden');
+                        alertText.textContent = `You have ${staleTasks.length} task${staleTasks.length !== 1 ? 's' : ''} that haven't been updated in over 7 days`;
+                    }
+                } else {
+                    document.getElementById('followUpAlert')?.classList.add('hidden');
+                }
+            }
+
+            showStaleTask() {
+                this.currentDateFilter = 'all';
+                document.getElementById('taskSearch').value = '';
+                // Filter to show only stale tasks
+                this.renderTasks(true);
+            }
+
+            // Task Rendering (Sorted by Due Date)
+            renderTasks(showOnlyStale = false) {
+                const search = document.getElementById('taskSearch')?.value.toLowerCase() || '';
+                const typeFilter = document.getElementById('taskTypeFilter')?.value || '';
+                
+                // Filter tasks
+                let filtered = this.tasks.filter(task => {
+                    const matchesSearch = !search || 
+                        task.description.toLowerCase().includes(search) ||
+                        task.customerName.toLowerCase().includes(search) ||
+                        (task.insuranceCompany || '').toLowerCase().includes(search) ||
+                        (task.policyNumber || '').toLowerCase().includes(search) ||
+                        (task.oneDriveLink || '').toLowerCase().includes(search) ||
+                        (task.phone || '').includes(search) ||
+                        (task.email || '').toLowerCase().includes(search);
+                    
+                    const matchesType = !typeFilter || task.taskType === typeFilter;
+                    const matchesCompleted = this.showCompleted || task.status !== 'completed';
+                    
+                    // Check if task is stale
+                    let isStale = false;
+                    if (showOnlyStale && task.status !== 'completed') {
+                        const taskComms = this.communications.filter(c => c.taskId === task.id);
+                        const lastCommDate = taskComms.length > 0 ? 
+                            Math.max(...taskComms.map(c => new Date(c.timestamp))) : 
+                            new Date(task.createdAt);
+                        const daysSinceContact = Math.floor((new Date() - lastCommDate) / (1000 * 60 * 60 * 24));
+                        isStale = daysSinceContact > 7;
+                    }
+                    
+                    // Date filtering
+                    let matchesDate = true;
+                    if (this.currentDateFilter !== 'all' && task.dueDate) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const dueDate = new Date(task.dueDate);
+                        dueDate.setHours(0, 0, 0, 0);
+                        const diffDays = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+                        
+                        switch(this.currentDateFilter) {
+                            case 'overdue':
+                                matchesDate = diffDays < 0 && task.status !== 'completed';
+                                break;
+                            case 'today':
+                                matchesDate = diffDays === 0;
+                                break;
+                            case 'tomorrow':
+                                matchesDate = diffDays === 1;
+                                break;
+                            case 'week':
+                                matchesDate = diffDays >= 0 && diffDays <= 7;
+                                break;
+                        }
+                    }
+                    
+                    return matchesSearch && matchesType && matchesCompleted && matchesDate && (!showOnlyStale || isStale);
+                });
+                
+                // ALWAYS sort by due date (earliest first, overdue at top)
+                filtered.sort((a, b) => {
+                    // Completed tasks go to bottom
+                    if (a.status === 'completed' && b.status !== 'completed') return 1;
+                    if (a.status !== 'completed' && b.status === 'completed') return -1;
+                    
+                    // Both have no due date - sort by created date
+                    if (!a.dueDate && !b.dueDate) {
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    }
+                    
+                    // One has no due date - it goes after tasks with due dates
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    
+                    // Both have due dates - sort by date
+                    const dateA = new Date(a.dueDate);
+                    const dateB = new Date(b.dueDate);
+                    
+                    // If same date, sort by priority
+                    if (dateA.getTime() === dateB.getTime()) {
+                        const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
+                        return priorityOrder[a.priority] - priorityOrder[b.priority];
+                    }
+                    
+                    return dateA - dateB;
+                });
+                
+                // Render all tasks
+                const allTasksList = document.getElementById('allTasksList');
+                const allTaskCount = document.getElementById('allTaskCount');
+                
+                if (allTasksList) {
+                    if (filtered.length === 0) {
+                        allTasksList.innerHTML = '<p class="text-sm text-slate-500 text-center py-8 col-span-full">No tasks found. Use Quick Actions or click "Add Task" to create a new task.</p>';
+                    } else {
+                        allTasksList.innerHTML = filtered.map(task => this.createTaskCard(task)).join('');
+                    }
+                }
+                
+                if (allTaskCount) {
+                    allTaskCount.textContent = filtered.filter(t => t.status !== 'completed').length;
+                }
+                
+                this.updateStats();
+                this.updateProgress();
+            }
+
+            createTaskCard(task) {
+                const priorityIcons = {
+                    urgent: '🔴',
+                    high: '🟠',
+                    normal: '🔵',
+                    low: '🟢'
+                };
+                
+                const typeColors = {
+                    change: 'task-type-change',
+                    requote: 'task-type-requote',
+                    renewal: 'task-type-renewal',
+                    new: 'task-type-new',
+                    claim: 'task-type-claim',
+                    todo: 'task-type-todo',
+                    'follow-up': '',
+                    other: ''
+                };
+                
+                // Calculate due date status
+                const dueStatus = this.getDueStatus(task.dueDate);
+                const dueClass = `due-${dueStatus}`;
+                const isCompleted = task.status === 'completed';
+                
+                // Get communications for this task
+                const taskComms = this.communications.filter(c => c.taskId === task.id);
+                const commCount = taskComms.length;
+                const lastComm = taskComms.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                
+                // Check if task is stale (no communication in 7+ days)
+                const lastCommDate = lastComm ? new Date(lastComm.timestamp) : new Date(task.createdAt);
+                const daysSinceContact = Math.floor((new Date() - lastCommDate) / (1000 * 60 * 60 * 24));
+                const isStale = daysSinceContact > 7 && !isCompleted;
+                
+                // Get due date badge
+                const dueBadge = this.getDueBadge(task.dueDate);
+                
+                // Create Gmail compose URL
+                const gmailUrl = task.email ? 
+                    `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(task.email)}&su=${encodeURIComponent('Re: ' + task.description)}` : 
+                    '';
+                
+                return `
+                    <div class="glass rounded-xl p-6 card-hover ${!isCompleted ? dueClass : ''} ${typeColors[task.taskType] || ''} ${isCompleted ? 'task-completed' : ''} ${task.priority === 'urgent' ? 'priority-urgent' : ''} ${isStale ? 'follow-up-needed' : ''}">
+                        <!-- Header Section -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xl">${priorityIcons[task.priority]}</span>
+                                <span class="text-sm font-semibold px-3 py-1.5 bg-white/50 dark:bg-slate-900/50 rounded-lg">
+                                    ${task.taskType.replace('-', ' ').toUpperCase()}
+                                </span>
+                                ${dueBadge}
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="flex gap-1.5">
+                                <button onclick="app.openCommunicationLog('${task.id}')" class="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 hover:bg-purple-200 flex items-center justify-center" title="Communications">
+                                    <i class="fas fa-comments"></i>
+                                </button>
+                                ${!isCompleted ? `
+                                    <button onclick="app.completeTask('${task.id}')" class="w-9 h-9 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 hover:bg-green-200 flex items-center justify-center" title="Complete">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                ` : `
+                                    <button onclick="app.uncompleteTask('${task.id}')" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-900/30 text-slate-600 hover:bg-slate-200 flex items-center justify-center" title="Reopen">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                `}
+                                <button onclick="app.editTask('${task.id}')" class="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-200 flex items-center justify-center" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="app.deleteTask('${task.id}')" class="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 flex items-center justify-center" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Customer Name - Prominent -->
+                        <h3 class="font-semibold text-xl mb-3 text-slate-900 dark:text-slate-100">${task.customerName}</h3>
+                        
+                        <!-- Description - Clear and Readable -->
+                        <p class="text-base leading-relaxed mb-4 ${isCompleted ? 'line-through opacity-60' : ''}">${task.description}</p>
+                        
+                        <!-- Metadata Section -->
+                        <div class="space-y-3 mb-4">
+                            ${task.insuranceCompany || task.policyNumber || task.premiumAmount ? `
+                                <div class="flex flex-wrap gap-3 text-sm">
+                                    ${task.insuranceCompany ? `
+                                        <span class="flex items-center gap-1.5">
+                                            <i class="fas fa-building text-slate-400"></i>
+                                            <span class="font-medium">${task.insuranceCompany}</span>
+                                        </span>
+                                    ` : ''}
+                                    ${task.policyNumber ? `
+                                        <span class="flex items-center gap-1.5">
+                                            <i class="fas fa-file-alt text-slate-400"></i>
+                                            <span>${task.policyNumber}</span>
+                                        </span>
+                                    ` : ''}
+                                    ${task.premiumAmount ? `
+                                        <span class="flex items-center gap-1.5">
+                                            <i class="fas fa-dollar-sign text-slate-400"></i>
+                                            <span>${task.premiumAmount}</span>
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                            
+                            ${task.followUpDate ? `
+                                <div class="flex items-center gap-1.5 text-sm text-orange-600 dark:text-orange-400">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Follow-up: ${this.formatDate(task.followUpDate)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Contact Section -->
+                        <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
+                                <i class="fas fa-calendar"></i>
+                                <span>Due: ${this.formatDate(task.dueDate)}</span>
+                            </div>
+                            <div class="flex gap-3">
+                                ${task.phone ? `
+                                    <a href="tel:${task.phone}" class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                        <i class="fas fa-phone"></i>
+                                        <span class="hidden sm:inline">Call</span>
+                                    </a>
+                                ` : ''}
+                                ${task.email ? `
+                                    <a href="${gmailUrl}" target="_blank" class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                        <i class="fas fa-envelope"></i>
+                                        <span class="hidden sm:inline">Email</span>
+                                    </a>
+                                ` : ''}
+                                ${task.oneDriveLink ? `
+                                    <a href="${task.oneDriveLink}" target="_blank" class="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1">
+                                        <i class="fas fa-cloud"></i>
+                                        <span class="hidden sm:inline">Files</span>
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Show additional info badges in footer if needed -->
+                        ${commCount > 0 || task.isRecurring || isStale ? `
+                            <div class="flex gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                                ${commCount > 0 ? `
+                                    <span class="text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-full">
+                                        <i class="fas fa-comments mr-1"></i>${commCount} comm${commCount !== 1 ? 's' : ''}
+                                    </span>
+                                ` : ''}
+                                ${task.isRecurring ? `
+                                    <span class="text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded-full">
+                                        <i class="fas fa-sync mr-1"></i>${task.recurringFrequency}
+                                    </span>
+                                ` : ''}
+                                ${isStale ? `
+                                    <span class="text-sm bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>${daysSinceContact}d stale
+                                    </span>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Expandable Notes Section (if exists) -->
+                        ${task.notes ? `
+                            <details class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                                <summary class="cursor-pointer text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <i class="fas fa-sticky-note mr-1"></i> View Notes
+                                </summary>
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400 italic">${task.notes}</p>
+                            </details>
+                        ` : ''}
+                        
+                        <!-- Last Communication Preview (if exists) -->
+                        ${lastComm ? `
+                            <details class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                                <summary class="cursor-pointer text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    <i class="fas fa-history mr-1"></i> Last Communication
+                                </summary>
+                                <div class="mt-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="comm-badge comm-${lastComm.commType}">
+                                            ${this.getCommIcon(lastComm.commType)} ${lastComm.commType}
+                                        </span>
+                                        <span class="text-xs text-slate-500">${this.formatDate(lastComm.commDate)}</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">${lastComm.commNotes}</p>
+                                </div>
+                            </details>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // Due Date Status Helpers
+            getDueStatus(dueDate) {
+                if (!dueDate) return 'later';
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const due = new Date(dueDate);
+                due.setHours(0, 0, 0, 0);
+                const diffDays = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0) return 'overdue';
+                if (diffDays === 0) return 'today';
+                if (diffDays === 1) return 'tomorrow';
+                if (diffDays <= 7) return 'thisweek';
+                return 'later';
+            }
+
+            getDueBadge(dueDate) {
+                const status = this.getDueStatus(dueDate);
+                const badges = {
+                    overdue: '<span class="due-badge due-badge-overdue">OVERDUE</span>',
+                    today: '<span class="due-badge due-badge-today">TODAY</span>',
+                    tomorrow: '<span class="due-badge due-badge-tomorrow">TOMORROW</span>',
+                    thisweek: '<span class="due-badge due-badge-thisweek">THIS WEEK</span>',
+                    later: ''
+                };
+                return badges[status];
+            }
+
+            // View Toggle Feature
+            toggleViewMode() {
+                const container = document.getElementById('allTasksList');
+                if (container.classList.contains('task-container-compact')) {
+                    container.classList.remove('task-container-compact');
+                    container.classList.add('task-container-comfortable');
+                    localStorage.setItem('viewMode', 'comfortable');
+                    this.showToast('Switched to comfortable view', 'info');
+                } else {
+                    container.classList.add('task-container-compact');
+                    container.classList.remove('task-container-comfortable');
+                    localStorage.setItem('viewMode', 'compact');
+                    this.showToast('Switched to compact view', 'info');
+                }
+            }
+
+            // Communication Management
+            openCommunicationLog(taskId) {
+                this.currentTaskIdForComm = taskId;
+                const modal = document.getElementById('communicationModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    this.renderCommunicationHistory();
+                    
+                    // Set default date/time
+                    const dateInput = document.querySelector('[name="commDate"]');
+                    const timeInput = document.querySelector('[name="commTime"]');
+                    if (dateInput) {
+                        dateInput.value = new Date().toISOString().split('T')[0];
+                    }
+                    if (timeInput) {
+                        const now = new Date();
+                        timeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                    }
+                }
+            }
+
+            closeCommunicationModal() {
+                document.getElementById('communicationModal')?.classList.add('hidden');
+                document.getElementById('communicationForm')?.reset();
+                this.currentTaskIdForComm = null;
+            }
+
+            renderCommunicationHistory() {
+                const container = document.getElementById('communicationHistory');
+                if (!container || !this.currentTaskIdForComm) return;
+                
+                const task = this.tasks.find(t => t.id === this.currentTaskIdForComm);
+                const taskComms = this.communications
+                    .filter(c => c.taskId === this.currentTaskIdForComm)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                if (taskComms.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-slate-500">
+                            <i class="fas fa-comments text-4xl mb-3 opacity-30"></i>
+                            <p class="text-sm">No communications yet</p>
+                            <p class="text-xs mt-1">Add your first communication below</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="mb-4 p-3 bg-white dark:bg-slate-800 rounded-lg sticky top-0">
+                        <p class="font-bold">${task ? task.customerName : 'Unknown'}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">${task ? task.description : ''}</p>
+                        ${task && task.insuranceCompany ? `<p class="text-xs text-slate-500 mt-1"><i class="fas fa-building mr-1"></i>${task.insuranceCompany}</p>` : ''}
+                    </div>
+                    ${taskComms.map(comm => this.createCommunicationCard(comm)).join('')}
+                `;
+            }
+
+            createCommunicationCard(comm) {
+                return `
+                    <div class="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="comm-badge comm-${comm.commType}">
+                                        ${this.getCommIcon(comm.commType)} ${comm.commType}
+                                    </span>
+                                    <span class="text-xs text-slate-500">
+                                        ${this.formatDate(comm.commDate)}
+                                        ${comm.commTime ? `at ${comm.commTime}` : ''}
+                                    </span>
+                                </div>
+                                <p class="text-sm">${comm.commNotes}</p>
+                            </div>
+                            <button onclick="app.deleteCommunication('${comm.id}')" class="action-btn bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 opacity-0 hover:opacity-100 transition-opacity">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            handleCommunicationSubmit(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                
+                const communication = {
+                    id: this.generateId(),
+                    taskId: this.currentTaskIdForComm,
+                    ...Object.fromEntries(formData),
+                    timestamp: new Date().toISOString()
+                };
+                
+                this.communications.push(communication);
+                
+                // Add to history
+                this.addHistory(this.currentTaskIdForComm, 'communication_added', {
+                    type: communication.commType,
+                    notes: communication.commNotes.substring(0, 50) + (communication.commNotes.length > 50 ? '...' : '')
+                });
+                
+                this.saveData();
+                this.renderCommunicationHistory();
+                this.renderTasks();
+                this.checkStaleTasks();
+                e.target.reset();
+                
+                // Reset date/time to current
+                const dateInput = document.querySelector('[name="commDate"]');
+                const timeInput = document.querySelector('[name="commTime"]');
+                if (dateInput) {
+                    dateInput.value = new Date().toISOString().split('T')[0];
+                }
+                if (timeInput) {
+                    const now = new Date();
+                    timeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                }
+                
+                this.showToast('Communication added', 'success');
+            }
+
+            deleteCommunication(commId) {
+                if (confirm('Delete this communication?')) {
+                    this.communications = this.communications.filter(c => c.id !== commId);
+                    this.saveData();
+                    this.renderCommunicationHistory();
+                    this.renderTasks();
+                    this.showToast('Communication deleted', 'info');
+                }
+            }
+
+            getCommIcon(type) {
+                const icons = {
+                    call: '📞',
+                    email: '📧',
+                    meeting: '🤝',
+                    text: '💬',
+                    note: '📝'
+                };
+                return icons[type] || '📌';
+            }
+
+            // Form Handlers
+            handleTaskSubmit(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                
+                // Handle insurance company selection
+                const carrierSelect = formData.get('insuranceCompanySelect');
+                let insuranceCompany = '';
+                if (carrierSelect === 'Other') {
+                    insuranceCompany = formData.get('insuranceCompany');
+                } else {
+                    insuranceCompany = carrierSelect;
+                }
+                
+                if (this.currentEditTaskId) {
+                    // Edit existing task
+                    const task = this.tasks.find(t => t.id === this.currentEditTaskId);
+                    if (task) {
+                        const taskData = Object.fromEntries(formData);
+                        delete taskData.insuranceCompanySelect; // Remove the select field
+                        taskData.insuranceCompany = insuranceCompany; // Use the processed value
+                        
+                        Object.assign(task, taskData);
+                        task.updatedAt = new Date().toISOString();
+                        
+                        // Handle recurring checkbox
+                        task.isRecurring = formData.get('isRecurring') === 'on';
+                        if (!task.isRecurring) {
+                            delete task.recurringFrequency;
+                        }
+                        
+                        this.showToast('Task updated successfully', 'success');
+                    }
+                } else {
+                    // Create new task
+                    const taskData = Object.fromEntries(formData);
+                    delete taskData.insuranceCompanySelect; // Remove the select field
+                    taskData.insuranceCompany = insuranceCompany; // Use the processed value
+                    
+                    const task = {
+                        id: this.generateId(),
+                        ...taskData,
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Handle recurring checkbox
+                    task.isRecurring = formData.get('isRecurring') === 'on';
+                    if (!task.isRecurring) {
+                        delete task.recurringFrequency;
+                    }
+                    
+                    this.tasks.push(task);
+                    
+                    // Add to history
+                    this.addHistory(task.id, 'created', {
+                        customerName: task.customerName,
+                        taskType: task.taskType,
+                        priority: task.priority
+                    });
+                    
+                    this.showToast('Task created successfully', 'success');
+                }
+                
+                this.saveData();
+                this.renderTasks();
+                this.checkStaleTasks();
+                this.closeTaskModal();
+                e.target.reset();
+                this.currentEditTaskId = null;
+            }
+
+            // Task Detail View
+            showTaskDetails(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                const modal = document.getElementById('taskDetailModal');
+                const content = document.getElementById('taskDetailContent');
+                if (!modal || !content) return;
+                
+                // Get communications for this task
+                const taskComms = this.communications
+                    .filter(c => c.taskId === taskId)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                // Get history for this task
+                const taskHistoryEntries = this.taskHistory
+                    .filter(h => h.taskId === taskId)
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                // Calculate days since last communication
+                const lastCommDate = taskComms.length > 0 ? 
+                    new Date(taskComms[0].timestamp) : 
+                    new Date(task.createdAt);
+                const daysSinceContact = Math.floor((new Date() - lastCommDate) / (1000 * 60 * 60 * 24));
+                
+                // Priority display
+                const priorityDisplay = {
+                    urgent: '🔴 Urgent',
+                    high: '🟠 High',
+                    normal: '🔵 Normal',
+                    low: '🟢 Low'
+                };
+                
+                // Status display
+                const statusDisplay = task.status === 'completed' ? 
+                    '<span class="text-green-600">✓ Completed</span>' : 
+                    '<span class="text-blue-600">● Active</span>';
+                
+                // Create Gmail compose URL
+                const gmailUrl = task.email ? 
+                    `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(task.email)}&su=${encodeURIComponent('Re: ' + task.description)}` : 
+                    '';
+                
+                content.innerHTML = `
+                    <div class="space-y-6">
+                        <!-- Header Section -->
+                        <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-2xl font-bold">${task.customerName}</h3>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                        ${task.taskType.replace('-', ' ').toUpperCase()} | ${statusDisplay}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-lg font-semibold">${priorityDisplay[task.priority]}</p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                        Created: ${this.formatDate(task.createdAt)}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Actions Bar -->
+                            <div class="flex gap-2 mt-4 flex-wrap">
+                                ${task.status !== 'completed' ? `
+                                    <button onclick="app.completeTask('${task.id}'); app.showTaskDetails('${task.id}');" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check mr-2"></i>Complete
+                                    </button>
+                                ` : `
+                                    <button onclick="app.uncompleteTask('${task.id}'); app.showTaskDetails('${task.id}');" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-undo mr-2"></i>Reopen
+                                    </button>
+                                `}
+                                <button onclick="closeTaskDetailModal(); app.editTask('${task.id}');" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit mr-2"></i>Edit
+                                </button>
+                                <button onclick="app.openCommunicationLog('${task.id}')" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-comments mr-2"></i>Add Communication
+                                </button>
+                                <button onclick="app.exportTaskHistory('${task.id}')" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-download mr-2"></i>Export History
+                                </button>
+                                ${task.email ? `
+                                    <a href="${gmailUrl}" target="_blank" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-envelope mr-2"></i>Email
+                                    </a>
+                                ` : ''}
+                                ${task.phone ? `
+                                    <a href="tel:${task.phone}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-phone mr-2"></i>Call
+                                    </a>
+                                ` : ''}
+                                ${task.oneDriveLink ? `
+                                    <a href="${task.oneDriveLink}" target="_blank" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-cloud mr-2"></i>OneDrive
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Main Details Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Left Column -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-500 uppercase">Description</label>
+                                    <div class="mt-1 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                                        <p class="whitespace-pre-wrap">${task.description || 'No description'}</p>
+                                    </div>
+                                </div>
+                                
+                                ${task.notes ? `
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-500 uppercase">Notes</label>
+                                        <div class="mt-1 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                                            <p class="whitespace-pre-wrap">${task.notes}</p>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Dates -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-500 uppercase">Due Date</label>
+                                        <p class="mt-1 font-medium ${this.getDueStatus(task.dueDate) === 'overdue' ? 'text-red-600' : ''}">
+                                            ${this.formatDate(task.dueDate)}
+                                        </p>
+                                    </div>
+                                    ${task.followUpDate ? `
+                                        <div>
+                                            <label class="text-xs font-semibold text-slate-500 uppercase">Follow-up Date</label>
+                                            <p class="mt-1 font-medium text-orange-600">
+                                                ${this.formatDate(task.followUpDate)}
+                                            </p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div class="space-y-4">
+                                <!-- Contact Information -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                                    <h4 class="font-semibold mb-3">Contact Information</h4>
+                                    <div class="space-y-2 text-sm">
+                                        ${task.phone ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Phone:</span>
+                                                <a href="tel:${task.phone}" class="text-blue-600 hover:text-blue-700">
+                                                    ${task.phone}
+                                                </a>
+                                            </div>
+                                        ` : ''}
+                                        ${task.email ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Email:</span>
+                                                <a href="${gmailUrl}" target="_blank" class="text-blue-600 hover:text-blue-700">
+                                                    ${task.email}
+                                                </a>
+                                            </div>
+                                        ` : ''}
+                                        ${!task.phone && !task.email ? '<p class="text-slate-500">No contact information</p>' : ''}
+                                    </div>
+                                </div>
+                                
+                                <!-- Policy Information -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                                    <h4 class="font-semibold mb-3">Policy Information</h4>
+                                    <div class="space-y-2 text-sm">
+                                        ${task.insuranceCompany ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Carrier:</span>
+                                                <span class="font-medium">${task.insuranceCompany}</span>
+                                            </div>
+                                        ` : ''}
+                                        ${task.policyNumber ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Policy #:</span>
+                                                <span class="font-medium">${task.policyNumber}</span>
+                                            </div>
+                                        ` : ''}
+                                        ${task.premiumAmount ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Premium:</span>
+                                                <span class="font-medium">${task.premiumAmount}</span>
+                                            </div>
+                                        ` : ''}
+                                        ${!task.insuranceCompany && !task.policyNumber && !task.premiumAmount ? 
+                                            '<p class="text-slate-500">No policy information</p>' : ''}
+                                    </div>
+                                </div>
+                                
+                                <!-- Task Metadata -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                                    <h4 class="font-semibold mb-3">Task Information</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600 dark:text-slate-400">Status:</span>
+                                            <span class="font-medium">${task.status === 'completed' ? 'Completed' : 'Active'}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-600 dark:text-slate-400">Days Since Contact:</span>
+                                            <span class="font-medium ${daysSinceContact > 7 ? 'text-orange-600' : ''}">${daysSinceContact} days</span>
+                                        </div>
+                                        ${task.isRecurring ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Recurring:</span>
+                                                <span class="font-medium">${task.recurringFrequency}</span>
+                                            </div>
+                                        ` : ''}
+                                        ${task.completedAt ? `
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-600 dark:text-slate-400">Completed:</span>
+                                                <span class="font-medium">${this.formatDate(task.completedAt)}</span>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Task History Timeline -->
+                        ${taskHistoryEntries.length > 0 ? `
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold text-lg">Task History</h4>
+                                    <span class="text-sm text-slate-500">${taskHistoryEntries.length} event${taskHistoryEntries.length !== 1 ? 's' : ''}</span>
+                                </div>
+                                <div class="space-y-2 max-h-64 overflow-y-auto">
+                                    ${taskHistoryEntries.map(entry => `
+                                        <div class="flex items-start gap-3 text-sm">
+                                            <span class="text-slate-400">${this.formatDate(entry.timestamp)}</span>
+                                            <span class="font-medium capitalize">${entry.action}</span>
+                                            ${entry.details ? `<span class="text-slate-600 dark:text-slate-400">${JSON.stringify(entry.details)}</span>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Communication History -->
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-semibold text-lg">Communication History</h4>
+                                <span class="text-sm text-slate-500">${taskComms.length} communication${taskComms.length !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                ${taskComms.length > 0 ? taskComms.map(comm => `
+                                    <div class="bg-slate-50 dark:bg-slate-900 rounded-lg p-4">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="comm-badge comm-${comm.commType}">
+                                                    ${this.getCommIcon(comm.commType)} ${comm.commType}
+                                                </span>
+                                                <span class="text-sm text-slate-500">
+                                                    ${this.formatDate(comm.commDate)}
+                                                    ${comm.commTime ? `at ${comm.commTime}` : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm">${comm.commNotes}</p>
+                                    </div>
+                                `).join('') : '<p class="text-slate-500 text-center py-4">No communications yet</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modal.classList.remove('hidden');
+            }
+
+            // Export individual task history
+            exportTaskHistory(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                const taskComms = this.communications
+                    .filter(c => c.taskId === taskId)
+                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                
+                const taskHistoryEntries = this.taskHistory
+                    .filter(h => h.taskId === taskId)
+                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                
+                let report = `TASK HISTORY REPORT\n`;
+                report += `Generated: ${new Date().toLocaleString()}\n`;
+                report += `=====================================\n\n`;
+                
+                report += `TASK INFORMATION:\n`;
+                report += `-----------------\n`;
+                report += `Customer: ${task.customerName}\n`;
+                report += `Type: ${task.taskType}\n`;
+                report += `Status: ${task.status}\n`;
+                report += `Priority: ${task.priority}\n`;
+                report += `Created: ${this.formatDate(task.createdAt)}\n`;
+                report += `Due Date: ${this.formatDate(task.dueDate)}\n`;
+                report += task.insuranceCompany ? `Carrier: ${task.insuranceCompany}\n` : '';
+                report += task.policyNumber ? `Policy #: ${task.policyNumber}\n` : '';
+                report += task.premiumAmount ? `Premium: ${task.premiumAmount}\n` : '';
+                report += `\nDESCRIPTION:\n${task.description}\n`;
+                report += task.notes ? `\nNOTES:\n${task.notes}\n` : '';
+                
+                report += `\n\nTASK HISTORY:\n`;
+                report += `--------------\n`;
+                if (taskHistoryEntries.length > 0) {
+                    taskHistoryEntries.forEach(entry => {
+                        report += `${this.formatDate(entry.timestamp)} - ${entry.action}\n`;
+                    });
+                } else {
+                    report += `No history events recorded\n`;
+                }
+                
+                report += `\n\nCOMMUNICATIONS:\n`;
+                report += `----------------\n`;
+                if (taskComms.length > 0) {
+                    taskComms.forEach(comm => {
+                        report += `${this.formatDate(comm.commDate)} ${comm.commTime || ''} - ${comm.commType.toUpperCase()}\n`;
+                        report += `${comm.commNotes}\n\n`;
+                    });
+                } else {
+                    report += `No communications recorded\n`;
+                }
+                
+                // Create download
+                const blob = new Blob([report], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `task-history-${task.customerName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
+                a.click();
+                
+                this.showToast('Task history exported', 'success');
+            }
+
+            closeTaskDetailModal() {
+                document.getElementById('taskDetailModal')?.classList.add('hidden');
+            }
+
+            // Task Actions
+            completeTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.status = 'completed';
+                    task.completedAt = new Date().toISOString();
+                    
+                    // Add to history
+                    this.addHistory(taskId, 'completed', {
+                        customerName: task.customerName,
+                        description: task.description
+                    });
+                    
+                    // If recurring, create next occurrence
+                    if (task.isRecurring && task.recurringFrequency) {
+                        this.createRecurringTask(task);
+                    }
+                    
+                    this.saveData();
+                    this.renderTasks();
+                    this.checkStaleTasks();
+                    this.showToast('Task completed!', 'success');
+                }
+            }
+
+            createRecurringTask(originalTask) {
+                const newTask = { ...originalTask };
+                newTask.id = this.generateId();
+                newTask.status = 'pending';
+                delete newTask.completedAt;
+                newTask.createdAt = new Date().toISOString();
+                
+                // Calculate next due date
+                const currentDue = new Date(originalTask.dueDate);
+                let nextDue = new Date(currentDue);
+                
+                switch (originalTask.recurringFrequency) {
+                    case 'daily':
+                        nextDue.setDate(nextDue.getDate() + 1);
+                        break;
+                    case 'weekly':
+                        nextDue.setDate(nextDue.getDate() + 7);
+                        break;
+                    case 'biweekly':
+                        nextDue.setDate(nextDue.getDate() + 14);
+                        break;
+                    case 'monthly':
+                        nextDue.setMonth(nextDue.getMonth() + 1);
+                        break;
+                    case 'quarterly':
+                        nextDue.setMonth(nextDue.getMonth() + 3);
+                        break;
+                    case 'semiannually':
+                        nextDue.setMonth(nextDue.getMonth() + 6);
+                        break;
+                    case 'yearly':
+                        nextDue.setFullYear(nextDue.getFullYear() + 1);
+                        break;
+                }
+                
+                newTask.dueDate = nextDue.toISOString().split('T')[0];
+                
+                // Update follow-up date if present
+                if (originalTask.followUpDate) {
+                    const currentFollowUp = new Date(originalTask.followUpDate);
+                    let nextFollowUp = new Date(currentFollowUp);
+                    
+                    const daysDiff = Math.floor((nextDue - currentDue) / (1000 * 60 * 60 * 24));
+                    nextFollowUp.setDate(nextFollowUp.getDate() + daysDiff);
+                    newTask.followUpDate = nextFollowUp.toISOString().split('T')[0];
+                }
+                
+                this.tasks.push(newTask);
+                this.showToast(`Recurring task created for ${this.formatDate(newTask.dueDate)}`, 'info');
+            }
+
+            uncompleteTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.status = 'pending';
+                    delete task.completedAt;
+                    
+                    // Add to history
+                    this.addHistory(taskId, 'reopened', {
+                        customerName: task.customerName
+                    });
+                    
+                    this.saveData();
+                    this.renderTasks();
+                    this.checkStaleTasks();
+                    this.showToast('Task reopened', 'info');
+                }
+            }
+
+            editTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                // Add to history
+                this.addHistory(taskId, 'edited', {
+                    customerName: task.customerName
+                });
+                
+                this.currentEditTaskId = taskId;
+                this.openTaskModal(task.taskType);
+                
+                // Populate form
+                setTimeout(() => {
+                    document.querySelector('[name="taskType"]').value = task.taskType;
+                    document.querySelector('[name="customerName"]').value = task.customerName;
+                    
+                    // Handle insurance company field
+                    const carrierSelect = document.getElementById('insuranceCompanySelect');
+                    const otherInput = document.getElementById('otherCarrierInput');
+                    const predefinedCarriers = ['State Farm', 'Allstate', 'Progressive', 'GEICO', 'Liberty Mutual', 
+                                                'Farmers', 'Nationwide', 'Travelers', 'American Family', 'USAA', 
+                                                'MetLife', 'Hartford', 'Chubb', 'Erie Insurance', 'Auto-Owners',
+                                                'National General', 'NC Grange Mutual', 'Alamance Farmers', 'Foremost'];
+                    
+                    if (task.insuranceCompany) {
+                        if (predefinedCarriers.includes(task.insuranceCompany)) {
+                            carrierSelect.value = task.insuranceCompany;
+                            otherInput.classList.add('hidden');
+                        } else {
+                            carrierSelect.value = 'Other';
+                            otherInput.classList.remove('hidden');
+                            otherInput.value = task.insuranceCompany;
+                        }
+                    } else {
+                        carrierSelect.value = '';
+                        otherInput.classList.add('hidden');
+                    }
+                    
+                    document.querySelector('[name="description"]').value = task.description;
+                    document.querySelector('[name="priority"]').value = task.priority;
+                    document.querySelector('[name="dueDate"]').value = task.dueDate || '';
+                    document.querySelector('[name="followUpDate"]').value = task.followUpDate || '';
+                    document.querySelector('[name="phone"]').value = task.phone || '';
+                    document.querySelector('[name="email"]').value = task.email || '';
+                    document.querySelector('[name="policyNumber"]').value = task.policyNumber || '';
+                    document.querySelector('[name="premiumAmount"]').value = task.premiumAmount || '';
+                    document.querySelector('[name="oneDriveLink"]').value = task.oneDriveLink || '';
+                    document.querySelector('[name="notes"]').value = task.notes || '';
+                    
+                    if (task.isRecurring) {
+                        document.querySelector('[name="isRecurring"]').checked = true;
+                        document.getElementById('recurringFrequency').classList.remove('hidden');
+                        document.querySelector('[name="recurringFrequency"]').value = task.recurringFrequency;
+                    }
+                }, 100);
+            }
+
+            deleteTask(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task && confirm('Delete this task and all its communications?')) {
+                    // Archive the task data before deletion (store in history)
+                    this.addHistory(taskId, 'deleted', {
+                        customerName: task.customerName,
+                        description: task.description,
+                        insuranceCompany: task.insuranceCompany,
+                        policyNumber: task.policyNumber
+                    });
+                    
+                    this.tasks = this.tasks.filter(t => t.id !== taskId);
+                    // Keep communications and history for record-keeping
+                    // Optionally, you could archive them instead of deleting
+                    this.communications = this.communications.filter(c => c.taskId !== taskId);
+                    
+                    this.saveData();
+                    this.renderTasks();
+                    this.checkStaleTasks();
+                    this.showToast('Task deleted', 'info');
+                }
+            }
+
+            // Modal Management
+            openTaskModal(type = '') {
+                document.getElementById('taskModal')?.classList.remove('hidden');
+                
+                // Update modal title
+                const modalTitle = document.getElementById('taskModalTitle');
+                if (modalTitle) {
+                    modalTitle.textContent = this.currentEditTaskId ? 'Edit Task' : 'Add Task';
+                }
+                
+                if (type) {
+                    document.getElementById('taskTypeSelect').value = type;
+                }
+                
+                // Set default due date to today
+                if (!this.currentEditTaskId) {
+                    document.querySelector('[name="dueDate"]').value = new Date().toISOString().split('T')[0];
+                }
+            }
+
+            closeTaskModal() {
+                document.getElementById('taskModal')?.classList.add('hidden');
+                document.getElementById('taskForm')?.reset();
+                document.getElementById('recurringFrequency')?.classList.add('hidden');
+                document.getElementById('otherCarrierInput')?.classList.add('hidden');
+                this.currentEditTaskId = null;
+            }
+
+            // Date Filter
+            filterByDate(filter) {
+                this.currentDateFilter = filter;
+                this.renderTasks();
+            }
+
+            // Templates
+            useTemplate(templateType) {
+                // For renewal templates, show date picker first
+                if (templateType === 'renewal-60' || templateType === 'renewal-30') {
+                    this.pendingTemplate = templateType;
+                    const modal = document.getElementById('templateDateModal');
+                    const dateInput = document.getElementById('templateDateInput');
+                    
+                    if (modal && dateInput) {
+                        // Set default date based on template type
+                        const defaultDate = new Date();
+                        if (templateType === 'renewal-60') {
+                            defaultDate.setDate(defaultDate.getDate() + 60);
+                        } else if (templateType === 'renewal-30') {
+                            defaultDate.setDate(defaultDate.getDate() + 30);
+                        }
+                        dateInput.value = defaultDate.toISOString().split('T')[0];
+                        modal.classList.remove('hidden');
+                    }
+                } else {
+                    // For non-renewal templates, apply directly
+                    this.applyTemplate(templateType);
+                }
+            }
+
+            applyTemplateWithDate() {
+                const dateInput = document.getElementById('templateDateInput');
+                const renewalDate = dateInput ? dateInput.value : null;
+                
+                if (this.pendingTemplate && renewalDate) {
+                    this.applyTemplate(this.pendingTemplate, renewalDate);
+                    this.closeTemplateDateModal();
+                }
+            }
+
+            closeTemplateDateModal() {
+                document.getElementById('templateDateModal')?.classList.add('hidden');
+                this.pendingTemplate = null;
+            }
+
+            applyTemplate(templateType, renewalDate = null) {
+                this.openTaskModal();
+                
+                const templates = {
+                    'renewal-60': {
+                        taskType: 'renewal',
+                        description: `60-day renewal follow-up - Policy expires ${renewalDate ? this.formatDate(renewalDate) : 'in 60 days'}
+- Review current coverage and premiums
+- Shop competitive rates with multiple carriers
+- Contact customer with renewal options
+- Verify any life changes or coverage needs`,
+                        priority: 'normal',
+                        notes: 'Contact customer about upcoming renewal. Review current coverage and shop for better rates if needed.',
+                        dueDate: renewalDate ? new Date(renewalDate).setDate(new Date(renewalDate).getDate() - 60) : null
+                    },
+                    'renewal-30': {
+                        taskType: 'renewal',
+                        description: `30-day renewal reminder - Policy expires ${renewalDate ? this.formatDate(renewalDate) : 'in 30 days'}
+- Final renewal processing required
+- Confirm coverage selections
+- Process payment or setup payment plan
+- Send final documents to customer`,
+                        priority: 'high',
+                        notes: 'Final renewal reminder - urgent follow-up needed. Process renewal or update coverage as discussed.',
+                        dueDate: renewalDate ? new Date(renewalDate).setDate(new Date(renewalDate).getDate() - 30) : null
+                    },
+                    'new-client': {
+                        taskType: 'new',
+                        description: 'Complete new client onboarding process',
+                        priority: 'high',
+                        notes: 'Send welcome packet, set up policy, verify coverage details, schedule follow-up call in 30 days'
+                    },
+                    'claim-followup': {
+                        taskType: 'claim',
+                        description: 'Follow up on claim status with carrier and customer',
+                        priority: 'urgent',
+                        notes: 'Check claim progress with carrier, update customer on status, assist with any documentation needed'
+                    },
+                    'quote-followup': {
+                        taskType: 'follow-up',
+                        description: 'Follow up on pending quote - close sale or update quote',
+                        priority: 'high',
+                        notes: 'Contact customer about quote provided. Answer questions, adjust coverage if needed, close sale.'
+                    },
+                    'payment-reminder': {
+                        taskType: 'follow-up',
+                        description: 'Payment reminder - Premium due',
+                        priority: 'urgent',
+                        notes: 'Contact customer about overdue payment to prevent policy cancellation.'
+                    }
+                };
+                
+                const template = templates[templateType];
+                if (template) {
+                    setTimeout(() => {
+                        document.querySelector('[name="taskType"]').value = template.taskType;
+                        document.querySelector('[name="description"]').value = template.description;
+                        document.querySelector('[name="priority"]').value = template.priority;
+                        document.querySelector('[name="notes"]').value = template.notes;
+                        
+                        // Set due date
+                        if (template.dueDate) {
+                            const dueDate = new Date(template.dueDate);
+                            document.querySelector('[name="dueDate"]').value = dueDate.toISOString().split('T')[0];
+                        } else if (!renewalDate) {
+                            // Set default due date to today for non-renewal templates
+                            document.querySelector('[name="dueDate"]').value = new Date().toISOString().split('T')[0];
+                        }
+                        
+                        // Set follow-up date for renewals
+                        if (renewalDate && (templateType === 'renewal-60' || templateType === 'renewal-30')) {
+                            const followUpDate = new Date(renewalDate);
+                            followUpDate.setDate(followUpDate.getDate() - 7); // Follow up 7 days before expiration
+                            document.querySelector('[name="followUpDate"]').value = followUpDate.toISOString().split('T')[0];
+                        }
+                    }, 100);
+                }
+            }
+
+            // Recurring Tasks
+            checkRecurringTasks() {
+                const recurringCount = this.tasks.filter(t => t.isRecurring && t.status !== 'completed').length;
+                document.getElementById('recurringCount').textContent = recurringCount;
+            }
+
+            showRecurringTasks() {
+                this.currentDateFilter = 'all';
+                document.getElementById('taskTypeFilter').value = '';
+                document.getElementById('taskSearch').value = 'recurring';
+                this.renderTasks();
+            }
+
+            // Progress Tracking
+            updateProgress() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const todayTasks = this.tasks.filter(t => {
+                    if (!t.dueDate) return false;
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    return dueDate.getTime() === today.getTime();
+                });
+                
+                const completedToday = todayTasks.filter(t => t.status === 'completed').length;
+                const totalToday = todayTasks.length;
+                
+                const percentage = totalToday > 0 ? (completedToday / totalToday) * 100 : 0;
+                
+                document.getElementById('progressBar').style.width = `${percentage}%`;
+                document.getElementById('progressText').textContent = `${completedToday} of ${totalToday} completed`;
+            }
+
+            // Due Task Notifications
+            checkDueTasks() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const overdueTasks = this.tasks.filter(t => {
+                    if (t.status === 'completed' || !t.dueDate) return false;
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    return dueDate < today;
+                });
+                
+                if (overdueTasks.length > 0) {
+                    this.showToast(`⚠️ You have ${overdueTasks.length} overdue task${overdueTasks.length !== 1 ? 's' : ''}!`, 'warning');
+                }
+            }
+
+            // Stats
+            updateStats() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const activeTasks = this.tasks.filter(t => t.status !== 'completed');
+                
+                const overdueTasks = activeTasks.filter(t => {
+                    if (!t.dueDate) return false;
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    return dueDate < today;
+                });
+                
+                const todayTasks = activeTasks.filter(t => {
+                    if (!t.dueDate) return false;
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    return dueDate.getTime() === today.getTime();
+                });
+                
+                const tomorrowTasks = activeTasks.filter(t => {
+                    if (!t.dueDate) return false;
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return dueDate.getTime() === tomorrow.getTime();
+                });
+                
+                const weekTasks = activeTasks.filter(t => {
+                    if (!t.dueDate) return false;
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    const diffDays = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+                    return diffDays >= 0 && diffDays <= 7;
+                });
+                
+                document.getElementById('overdueCount').textContent = overdueTasks.length;
+                document.getElementById('todayCount').textContent = todayTasks.length;
+                document.getElementById('tomorrowCount').textContent = tomorrowTasks.length;
+                document.getElementById('weekCount').textContent = weekTasks.length;
+                document.getElementById('totalTasksCount').textContent = activeTasks.length;
+                
+                this.checkRecurringTasks();
+            }
+
+            // Report Generation
+            generateReport() {
+                const today = new Date();
+                const thirtyDaysAgo = new Date(today);
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                
+                const completedLast30 = this.tasks.filter(t => {
+                    if (t.status !== 'completed' || !t.completedAt) return false;
+                    return new Date(t.completedAt) >= thirtyDaysAgo;
+                });
+                
+                const tasksByType = {};
+                this.tasks.forEach(t => {
+                    tasksByType[t.taskType] = (tasksByType[t.taskType] || 0) + 1;
+                });
+                
+                const carrierStats = {};
+                this.tasks.forEach(t => {
+                    if (t.insuranceCompany) {
+                        carrierStats[t.insuranceCompany] = (carrierStats[t.insuranceCompany] || 0) + 1;
+                    }
+                });
+                
+                let report = `TASK MANAGER REPORT - ${today.toLocaleDateString()}\n`;
+                report += `=====================================\n\n`;
+                report += `SUMMARY:\n`;
+                report += `Total Tasks: ${this.tasks.length}\n`;
+                report += `Active Tasks: ${this.tasks.filter(t => t.status !== 'completed').length}\n`;
+                report += `Completed (Last 30 Days): ${completedLast30.length}\n`;
+                report += `Overdue: ${document.getElementById('overdueCount').textContent}\n\n`;
+                
+                report += `TASKS BY TYPE:\n`;
+                Object.entries(tasksByType).forEach(([type, count]) => {
+                    report += `${type}: ${count}\n`;
+                });
+                
+                report += `\nTASKS BY CARRIER:\n`;
+                Object.entries(carrierStats).forEach(([carrier, count]) => {
+                    report += `${carrier}: ${count}\n`;
+                });
+                
+                // Create download
+                const blob = new Blob([report], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `task-report-${today.toISOString().split('T')[0]}.txt`;
+                a.click();
+                
+                this.showToast('Report generated successfully', 'success');
+            }
+
+            // Utility Functions
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            formatDate(dateString) {
+                if (!dateString) return 'No date set';
+                
+                const date = new Date(dateString);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                date.setHours(0, 0, 0, 0);
+                
+                const diffDays = Math.floor((date - today) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) return 'Today';
+                if (diffDays === 1) return 'Tomorrow';
+                if (diffDays === -1) return 'Yesterday';
+                if (diffDays < -1) return `${Math.abs(diffDays)} days overdue`;
+                if (diffDays > 1 && diffDays <= 7) return `In ${diffDays} days`;
+                
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const icon = document.getElementById('toastIcon');
+                const messageEl = document.getElementById('toastMessage');
+                
+                const icons = {
+                    success: 'fas fa-check-circle text-green-500',
+                    error: 'fas fa-exclamation-circle text-red-500',
+                    info: 'fas fa-info-circle text-blue-500',
+                    warning: 'fas fa-exclamation-triangle text-yellow-500'
+                };
+                
+                icon.className = icons[type] + ' text-xl';
+                messageEl.textContent = message;
+                
+                toast.classList.remove('translate-y-full');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-full');
+                }, 3000);
+            }
+
+            // Data Management
+            exportData() {
+                const data = {
+                    tasks: this.tasks,
+                    communications: this.communications,
+                    taskHistory: this.taskHistory,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `insurance-tasks-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                
+                this.showToast('Data exported successfully', 'success');
+            }
+
+            importData() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'application/json';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            try {
+                                const data = JSON.parse(event.target.result);
+                                if (data.tasks) {
+                                    if (confirm('This will replace all existing data. Continue?')) {
+                                        this.tasks = data.tasks || [];
+                                        this.communications = data.communications || [];
+                                        this.taskHistory = data.taskHistory || [];
+                                        this.saveData();
+                                        this.renderTasks();
+                                        this.checkStaleTasks();
+                                        this.showToast('Data imported successfully', 'success');
+                                    }
+                                }
+                            } catch (error) {
+                                this.showToast('Error importing data', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                
+                input.click();
+            }
+
+            clearCompleted() {
+                const completedCount = this.tasks.filter(t => t.status === 'completed').length;
+                
+                if (completedCount === 0) {
+                    this.showToast('No completed tasks to clear', 'info');
+                    return;
+                }
+                
+                if (confirm(`Clear ${completedCount} completed task${completedCount !== 1 ? 's' : ''}?`)) {
+                    this.tasks = this.tasks.filter(t => t.status !== 'completed');
+                    this.saveData();
+                    this.renderTasks();
+                    this.showToast('Completed tasks cleared', 'success');
+                }
+            }
+        }
+
+        // Global functions
+        let app;
+
+        function showTaskDetails(taskId) {
+            if (app) app.showTaskDetails(taskId);
+        }
+
+        function openTaskModal(type) {
+            if (app) app.openTaskModal(type);
+        }
+
+        function closeTemplateDateModal() {
+            if (app) app.closeTemplateDateModal();
+        }
+
+        function applyTemplateWithDate() {
+            if (app) app.applyTemplateWithDate();
+        }
+
+        function closeTaskDetailModal() {
+            if (app) app.closeTaskDetailModal();
+        }
+
+        function closeTaskModal() {
+            if (app) app.closeTaskModal();
+        }
+
+        function closeCommunicationModal() {
+            if (app) app.closeCommunicationModal();
+        }
+
+        function openQuickTaskModal() {
+            if (app) app.openTaskModal();
+        }
+
+        function toggleCompletedTasks() {
+            if (app) {
+                app.showCompleted = !app.showCompleted;
+                app.renderTasks();
+                const btn = event.target.closest('button');
+                if (btn) {
+                    btn.innerHTML = app.showCompleted ? 
+                        '<i class="fas fa-eye-slash mr-2"></i>Hide' : 
+                        '<i class="fas fa-eye mr-2"></i>Completed';
+                }
+            }
+        }
+
+        function filterByDate(filter) {
+            if (app) app.filterByDate(filter);
+        }
+
+        function useTemplate(template) {
+            if (app) app.useTemplate(template);
+        }
+
+        function showRecurringTasks() {
+            if (app) app.showRecurringTasks();
+        }
+
+        function showStaleTask() {
+            if (app) app.showStaleTask();
+        }
+
+        function toggleRecurring(checkbox) {
+            const freq = document.getElementById('recurringFrequency');
+            if (freq) {
+                if (checkbox.checked) {
+                    freq.classList.remove('hidden');
+                } else {
+                    freq.classList.add('hidden');
+                }
+            }
+        }
+
+        function toggleOtherCarrier(select) {
+            const otherInput = document.getElementById('otherCarrierInput');
+            if (otherInput) {
+                if (select.value === 'Other') {
+                    otherInput.classList.remove('hidden');
+                    otherInput.required = true;
+                } else {
+                    otherInput.classList.add('hidden');
+                    otherInput.required = false;
+                    otherInput.value = '';
+                }
+            }
+        }
+
+        function exportData() {
+            if (app) app.exportData();
+        }
+
+        function importData() {
+            if (app) app.importData();
+        }
+
+        function clearCompleted() {
+            if (app) app.clearCompleted();
+        }
+
+        function generateReport() {
+            if (app) app.generateReport();
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new InsuranceTaskManager();
+            window.app = app;
+        });
+    </script>
+</body>
+</html>
